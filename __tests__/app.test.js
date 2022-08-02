@@ -12,23 +12,27 @@ beforeEach(() => {
   return seed(data);
 });
 
+describe("general errors", () => {
+  test("should return a 404 Not Found error if the route provided does not exist", () => {
+    return request(app)
+      .get("/notARoute")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("The route does not exist");
+      });
+  });
+});
+
 describe("GET /api/topics", () => {
   describe("Successful usage", () => {
-    test("should return status 200", () => {
-      return request(app).get("/api/topics").expect(200);
-    });
-    test("should return an array of topics from test data", () => {
+    test("Status 200: should return an array of topic objects, each of which with 'slug' and 'description' properties", () => {
       return request(app)
         .get("/api/topics")
+        .expect(200)
         .then(({ body }) => {
+          // tests that the correct array is returned
           expect(body).toBeInstanceOf(Array);
           expect(body).toHaveLength(3);
-        });
-    });
-    test("returned array should contain topic objects, each of which with 'slug' and 'description' properties", () => {
-      return request(app)
-        .get("/api/topics")
-        .then(({ body }) => {
           body.forEach((topic) => {
             // tests that each array element is an object
             expect(typeof topic).toBe("object");
