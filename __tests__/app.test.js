@@ -30,17 +30,13 @@ describe("GET /api/topics", () => {
         .get("/api/topics")
         .expect(200)
         .then(({ body }) => {
-          // tests that the correct array is returned
           expect(body).toBeInstanceOf(Array);
           expect(body).toHaveLength(3);
           body.forEach((topic) => {
-            // tests that each array element is an object
             expect(typeof topic).toBe("object");
             expect(topic !== null).toBe(true);
             expect(!Array.isArray(topic)).toBe(true);
-            // tests that each object has two key/value pairs
             expect(Object.keys(topic).length).toBe(2);
-            // tests that each object has desired keys and value input types
             expect(topic).toEqual(
               expect.objectContaining({
                 description: expect.any(String),
