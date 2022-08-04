@@ -87,7 +87,7 @@ describe("GET /api/articles/:article_id", () => {
           expect(typeof body).toBe("object");
           expect(body !== null).toBe(true);
           expect(!Array.isArray(body)).toBe(true);
-          expect(Object.keys(body).length).toBe(7);
+          expect(Object.keys(body).length).toBe(8);
           expect(body).toEqual(
             expect.objectContaining({
               article_id: articleId,
@@ -97,6 +97,7 @@ describe("GET /api/articles/:article_id", () => {
               body: "I find this existence challenging",
               created_at: expect.any(String),
               votes: 100,
+              comment_count: 11,
             })
           );
         });
