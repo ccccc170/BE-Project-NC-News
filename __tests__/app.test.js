@@ -49,6 +49,33 @@ describe("GET /api/topics", () => {
   });
 });
 
+describe("GET /api/users", () => {
+  describe("Successful usage", () => {
+    test("Status 200: should return an array of user objects, each of which with 'username', 'name' and 'avatar_url' properties", () => {
+      return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toBeInstanceOf(Array);
+          expect(body).toHaveLength(4);
+          body.forEach((user) => {
+            expect(typeof user).toBe("object");
+            expect(user !== null).toBe(true);
+            expect(!Array.isArray(user)).toBe(true);
+            expect(Object.keys(user).length).toBe(3);
+            expect(user).toEqual(
+              expect.objectContaining({
+                username: expect.any(String),
+                name: expect.any(String),
+                avatar_url: expect.any(String),
+              })
+            );
+          });
+        });
+    });
+  });
+});
+
 describe("GET /api/articles/:article_id", () => {
   describe("Successful usage", () => {
     test("Status 200: should respond with an article object with 'author', 'title', 'article_id', 'body', 'topic', 'created_at' and 'votes' properties corresponding to the passed in article id", () => {
