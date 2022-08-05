@@ -164,6 +164,54 @@ describe("GET /api/articles/:article_id", () => {
   });
 });
 
+describe("GET /api/articles/:article_id/comments", () => {
+  describe("Successful usage", () => {
+    test("Status 200: should respond with an array of comments objects, each of which with 'comment_id', 'votes', 'created_at', 'author' and 'body' properties corresponding to the passed in article id", () => {
+      const articleId = 1;
+      return request(app)
+        .get(`/api/articles/${articleId}/comments`)
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toBeInstanceOf(Array);
+          expect(body).toHaveLength(11);
+          body.forEach((user) => {
+            expect(typeof user).toBe("object");
+            expect(user !== null).toBe(true);
+            expect(!Array.isArray(user)).toBe(true);
+            expect(user).toEqual(
+              expect.objectContaining({
+                comment_id: expect.any(Number),
+                author: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                body: expect.any(String),
+              })
+            );
+          });
+        });
+    });
+  });
+  describe("errors", () => {
+    test("GET:404 responds with an appropriate error message when given a valid but non-existent id", () => {
+      const articleId = 99999;
+      return request(app)
+        .get(`/api/articles/${articleId}/comments`)
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("article not found!");
+        });
+    });
+    test("GET:400 responds with an appropriate error message when given an invalid id", () => {
+      return request(app)
+        .get("/api/articles/not-an-id/comments")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("bad request: invalid id!");
+        });
+    });
+  });
+});
+
 describe("PATCH /api/articles/:article_id", () => {
   describe("Successful usage", () => {
     test("PATCH: 200 should take an article id and an object indicating an amount to increment the corresponding article's 'vote' property by, increment the property by this amount in the database and respond with the updated article object", () => {
