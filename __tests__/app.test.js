@@ -33,10 +33,6 @@ describe("GET /api/topics", () => {
           expect(body).toBeInstanceOf(Array);
           expect(body).toHaveLength(3);
           body.forEach((topic) => {
-            expect(typeof topic).toBe("object");
-            expect(topic !== null).toBe(true);
-            expect(!Array.isArray(topic)).toBe(true);
-            expect(Object.keys(topic).length).toBe(2);
             expect(topic).toEqual(
               expect.objectContaining({
                 description: expect.any(String),
@@ -59,10 +55,6 @@ describe("GET /api/users", () => {
           expect(body).toBeInstanceOf(Array);
           expect(body).toHaveLength(4);
           body.forEach((user) => {
-            expect(typeof user).toBe("object");
-            expect(user !== null).toBe(true);
-            expect(!Array.isArray(user)).toBe(true);
-            expect(Object.keys(user).length).toBe(3);
             expect(user).toEqual(
               expect.objectContaining({
                 username: expect.any(String),
@@ -86,9 +78,6 @@ describe("GET /api/articles", () => {
           expect(body).toBeInstanceOf(Array);
           expect(body).toHaveLength(12);
           body.forEach((user) => {
-            expect(typeof user).toBe("object");
-            expect(user !== null).toBe(true);
-            expect(!Array.isArray(user)).toBe(true);
             expect(user).toEqual(
               expect.objectContaining({
                 article_id: expect.any(Number),
@@ -114,9 +103,6 @@ describe("GET /api/articles/:article_id", () => {
         .get(`/api/articles/${articleId}`)
         .expect(200)
         .then(({ body }) => {
-          expect(typeof body).toBe("object");
-          expect(body !== null).toBe(true);
-          expect(!Array.isArray(body)).toBe(true);
           expect(body).toEqual(
             expect.objectContaining({
               article_id: articleId,
@@ -166,7 +152,7 @@ describe("GET /api/articles/:article_id", () => {
 
 describe("GET /api/articles/:article_id/comments", () => {
   describe("Successful usage", () => {
-    test("Status 200: should respond with an array of comments objects, each of which with 'comment_id', 'votes', 'created_at', 'author' and 'body' properties corresponding to the passed in article id", () => {
+    test("Status 200: should respond with an array of comments objects, each of which with 'comment_id', 'votes', 'created_at', 'author' and 'body' properties corresponding to the passed in article id when comments are associated with that id", () => {
       const articleId = 1;
       return request(app)
         .get(`/api/articles/${articleId}/comments`)
@@ -174,11 +160,8 @@ describe("GET /api/articles/:article_id/comments", () => {
         .then(({ body }) => {
           expect(body).toBeInstanceOf(Array);
           expect(body).toHaveLength(11);
-          body.forEach((user) => {
-            expect(typeof user).toBe("object");
-            expect(user !== null).toBe(true);
-            expect(!Array.isArray(user)).toBe(true);
-            expect(user).toEqual(
+          body.forEach((comment) => {
+            expect(comment).toEqual(
               expect.objectContaining({
                 comment_id: expect.any(Number),
                 author: expect.any(String),
@@ -188,6 +171,16 @@ describe("GET /api/articles/:article_id/comments", () => {
               })
             );
           });
+        });
+    });
+    test("Status 200: should return an empty array when the passed in a valid article id that has no comments associated with it", () => {
+      const articleId = 2;
+      return request(app)
+        .get(`/api/articles/${articleId}/comments`)
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toBeInstanceOf(Array);
+          expect(body).toHaveLength(0);
         });
     });
   });
@@ -222,10 +215,6 @@ describe("PATCH /api/articles/:article_id", () => {
         .send(articleUpdate)
         .expect(200)
         .then(({ body }) => {
-          expect(typeof body).toBe("object");
-          expect(body !== null).toBe(true);
-          expect(!Array.isArray(body)).toBe(true);
-          expect(Object.keys(body).length).toBe(7);
           expect(body).toEqual(
             expect.objectContaining({
               article_id: articleId,
