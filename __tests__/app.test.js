@@ -76,6 +76,36 @@ describe("GET /api/users", () => {
   });
 });
 
+describe("GET /api/articles", () => {
+  describe("Successful usage", () => {
+    test("Status 200: should respond with an array of article objects, each of which with 'author', 'title', 'article_id', 'topic', 'created_at', 'votes' and 'comment_count' properties", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toBeInstanceOf(Array);
+          expect(body).toHaveLength(12);
+          body.forEach((user) => {
+            expect(typeof user).toBe("object");
+            expect(user !== null).toBe(true);
+            expect(!Array.isArray(user)).toBe(true);
+            expect(user).toEqual(
+              expect.objectContaining({
+                article_id: expect.any(Number),
+                title: expect.any(String),
+                topic: expect.any(String),
+                author: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                comment_count: expect.any(Number),
+              })
+            );
+          });
+        });
+    });
+  });
+});
+
 describe("GET /api/articles/:article_id", () => {
   describe("Successful usage", () => {
     test("Status 200: should respond with an article object with 'author', 'title', 'article_id', 'body', 'topic', 'created_at' and 'votes' properties corresponding to the passed in article id", () => {
@@ -96,7 +126,6 @@ describe("GET /api/articles/:article_id", () => {
               body: "I find this existence challenging",
               created_at: expect.any(String),
               votes: 100,
-              comment_count: 11,
             })
           );
         });
