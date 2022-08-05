@@ -87,7 +87,6 @@ describe("GET /api/articles/:article_id", () => {
           expect(typeof body).toBe("object");
           expect(body !== null).toBe(true);
           expect(!Array.isArray(body)).toBe(true);
-          expect(Object.keys(body).length).toBe(8);
           expect(body).toEqual(
             expect.objectContaining({
               article_id: articleId,
@@ -97,6 +96,18 @@ describe("GET /api/articles/:article_id", () => {
               body: "I find this existence challenging",
               created_at: expect.any(String),
               votes: 100,
+              comment_count: 11,
+            })
+          );
+        });
+    });
+    test("response object should also include a comment count which is the total count of all comments associated with the passed in article id", () => {
+      const articleId = 1;
+      return request(app)
+        .get(`/api/articles/${articleId}`)
+        .then(({ body }) => {
+          expect(body).toEqual(
+            expect.objectContaining({
               comment_count: 11,
             })
           );
