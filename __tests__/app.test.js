@@ -47,7 +47,7 @@ describe("GET /api/topics", () => {
 
 describe("GET /api/users", () => {
   describe("Successful usage", () => {
-    test("Status 200: should return an array of user objects, each of which with 'username', 'name' and 'avatar_url' properties", () => {
+    test("Status 200: should respond with an array of user objects, each of which with 'username', 'name' and 'avatar_url' properties", () => {
       return request(app)
         .get("/api/users")
         .expect(200)
@@ -267,7 +267,7 @@ describe("PATCH /api/articles/:article_id", () => {
           expect(body.msg).toBe("bad request: invalid id!");
         });
     });
-    test("PATCH: 400 responds with an appropriate error message when passed an object which does does not include the required data in the correct format to specify a value to increment or decrement the 'vote' property by", () => {
+    test("PATCH: 400 responds with an appropriate error message when passed a valid id but an object which does does not include the required data in the correct format to specify a value to increment or decrement the 'vote' property by", () => {
       const articleId = 1;
       const articleUpdate = {};
       return request(app)
@@ -278,7 +278,7 @@ describe("PATCH /api/articles/:article_id", () => {
           expect(body.msg).toBe("unable to update: information missing!");
         });
     });
-    test("PATCH: 400 responds with an appropriate error message when passed an object which is in the correct format but includes an incorrect data type to specify a value to increment or decrement the 'vote' property by", () => {
+    test("PATCH: 400 responds with an appropriate error message when passed a valid id but an object which is in the correct format but includes an incorrect data type to specify a value to increment or decrement the 'vote' property by", () => {
       const articleId = 1;
       const articleUpdate = { inc_votes: "one" };
       return request(app)
@@ -287,6 +287,105 @@ describe("PATCH /api/articles/:article_id", () => {
         .expect(400)
         .then(({ body }) => {
           expect(body.msg).toBe("unable to update: incorrect data type!");
+        });
+    });
+  });
+});
+
+describe("POST /api/articles/:article_id/comments", () => {
+  describe("successful usage", () => {
+    test("Status 201: Should take an article id and comment object with 'username' and 'body' properties, add the comment to the database and return the posted comment", () => {
+      const articleId = 1;
+      const inputComment = {
+        username: "butter_bridge",
+        body: "This is a comment!",
+      };
+      return request(app)
+        .post(`/api/articles/${articleId}/comments`)
+        .send(inputComment)
+        .expect(201)
+        .then(({ body }) => {
+          expect(body).toEqual(
+            expect.objectContaining({
+              article_id: articleId,
+              author: inputComment.username,
+              body: inputComment.body,
+              created_at: expect.any(String),
+              votes: 0,
+            })
+          );
+        });
+    });
+  });
+  describe("errors", () => {
+    test("POST: 404 responds with an appropriate error message when given a valid comment object and a valid but non-existent id", () => {
+      const articleId = 99999;
+      const inputComment = {
+        username: "butter_bridge",
+        body: "This is a comment!",
+      };
+      return request(app)
+        .post(`/api/articles/${articleId}/comments`)
+        .send(inputComment)
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("endpoint not found, unable to find user!");
+        });
+    });
+    test("POST: 400 responds with an appropriate error message when given a valid comment object and an invalid id", () => {
+      const inputComment = {
+        username: "butter_bridge",
+        body: "This is a comment!",
+      };
+      return request(app)
+        .post("/api/articles/not-an-id/comments")
+        .send(inputComment)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("bad request: invalid id!");
+        });
+    });
+    test("POST: 400 responds with an appropriate error message when passed a valid id but an object which does does not include the required data in the correct format to be able to add a comment to the database", () => {
+      const articleId = 1;
+      const inputComment = {};
+      return request(app)
+        .post(`/api/articles/${articleId}/comments`)
+        .send(inputComment)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe(
+            "unable to post: information missing or incorrect data type!"
+          );
+        });
+    });
+    test("POST: 400 responds with an appropriate error message when passed a valid id and an object which is in the correct format but includes an incorrect data type to be able to add the comment to the database", () => {
+      const articleId = 1;
+      const inputComment = {
+        username: "butter_bridge",
+        body: null,
+      };
+      return request(app)
+        .post(`/api/articles/${articleId}/comments`)
+        .send(inputComment)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe(
+            "unable to post: information missing or incorrect data type!"
+          );
+        });
+    });
+    test("POST: 400 responds with an appropriate error message when passed a valid id but an object which has a username property value not present in the users database", () => {
+      const articleId = 1;
+      const inputComment = {
+        username: "usrername1",
+        body: "This is a comment!",
+      };
+      return request(app)
+        .post(`/api/articles/${articleId}/comments`)
+        .send(inputComment)
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("endpoint not found, unable to find user!");
         });
     });
   });
