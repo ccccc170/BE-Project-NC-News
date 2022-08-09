@@ -1,3 +1,4 @@
+const { response } = require("../app");
 const db = require("../db/connection");
 
 exports.selectCommentsByArticleId = (article_id) => {
@@ -26,5 +27,17 @@ exports.selectCommentsByArticleId = (article_id) => {
           });
       }
       return comments;
+    });
+};
+
+exports.addComment = (article_id, comment) => {
+  const { username, body } = comment;
+  return db
+    .query(
+      `INSERT INTO comments (article_id, author, body) VALUES ($1, $2, $3) RETURNING *;`,
+      [article_id, username, body]
+    )
+    .then(({ rows: [comment] }) => {
+      return comment;
     });
 };
