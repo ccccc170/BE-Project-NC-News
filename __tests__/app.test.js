@@ -92,6 +92,83 @@ describe("GET /api/articles", () => {
           });
         });
     });
+    test("Status 200: default sort by and sort order of response should be by date descending", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toBeSortedBy("created_at", {
+            descending: true,
+          });
+        });
+    });
+    test("Status 200: articles in response should be filtered by topic value if specified within the query", () => {
+      return request(app)
+        .get("/api/articles?topic=cats")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toHaveLength(1);
+          body.forEach((article) => {
+            expect(article).toEqual(
+              expect.objectContaining({
+                topic: "cats",
+              })
+            );
+          });
+        });
+    });
+    test("Status 200: response should be sorted by by specified column as per the query passed in", () => {
+      return request(app)
+        .get("/api/articles?sort_by=title")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toBeSortedBy("title", {
+            descending: true,
+            coerce: true,
+          });
+        });
+    });
+    test("Status 200: response order should by ascedning if specified within the query", () => {
+      return request(app)
+        .get("/api/articles?order=asc")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toBeSortedBy("created_at", {
+            ascending: true,
+            coerce: true,
+          });
+        });
+    });
+    test("Status 200: response order should by descending if specified within the query", () => {
+      return request(app)
+        .get("/api/articles?order=desc")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toBeSortedBy("created_at", {
+            descending: true,
+            coerce: true,
+          });
+        });
+    });
+    test("Status 200: response articles should be filtered by topic, sorted by specified column and ordered by specified order when all three query options are used in the same query", () => {
+      return request(app)
+        .get("/api/articles?topic=cats&sort_by=votes&order=asc")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toBeSortedBy("votes", {
+            ascending: true,
+            coerce: true,
+          });
+          expect(body).toHaveLength(1);
+          body.forEach((user) => {
+            expect(user).toEqual(
+              expect.objectContaining({
+                topic: "cats",
+              })
+            );
+          });
+        });
+    });
   });
 });
 
