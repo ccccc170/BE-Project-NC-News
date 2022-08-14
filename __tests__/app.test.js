@@ -102,7 +102,7 @@ describe("GET /api/articles", () => {
           });
         });
     });
-    test("Status 200: articles in response should be filtered by topic value if specified within the query", () => {
+    test("Status 200: articles in response should be filtered by topic value if specified within the query, returining only articles witht that topic value", () => {
       return request(app)
         .get("/api/articles?topic=cats")
         .expect(200)
@@ -115,6 +115,14 @@ describe("GET /api/articles", () => {
               })
             );
           });
+        });
+    });
+    test("Status 200: should respond with an empty array if query specifies a topic that no articles present in the database correspond to", () => {
+      return request(app)
+        .get("/api/articles?topic=dogs")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toHaveLength(0);
         });
     });
     test("Status 200: response should be sorted by by specified column as per the query passed in", () => {
@@ -167,6 +175,24 @@ describe("GET /api/articles", () => {
               })
             );
           });
+        });
+    });
+  });
+  describe("errors", () => {
+    test("Status 400: should respond with appropriate error message when passed an invalid sort query", () => {
+      return request(app)
+        .get("/api/articles?sort_by=height")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid sort query!");
+        });
+    });
+    test("Status 400: should respond with appropriate error message when passed an invalid order query", () => {
+      return request(app)
+        .get("/api/articles?order=sideways")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid order query!");
         });
     });
   });

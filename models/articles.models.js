@@ -22,7 +22,7 @@ exports.selectArticles = (queries) => {
         "comment_id",
       ].includes(sort_by)
     ) {
-      return Promise.reject({ status: 400, msg: "Invalid sort query" });
+      return Promise.reject({ status: 400, msg: "Invalid sort query!" });
     } else {
       queryStr += ` ORDER BY ${sort_by}`;
     }
@@ -31,7 +31,7 @@ exports.selectArticles = (queries) => {
   }
   if (order) {
     if (!["asc", "desc"].includes(order)) {
-      return Promise.reject({ status: 400, msg: "Invalid order query" });
+      return Promise.reject({ status: 400, msg: "Invalid order query!" });
     } else {
       orderUpper = order.toUpperCase();
       queryStr += ` ${orderUpper};`;
