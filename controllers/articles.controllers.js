@@ -5,7 +5,8 @@ const {
 } = require("../models/articles.models");
 
 exports.getArticles = (req, res, next) => {
-  selectArticles()
+  queryObj = req.query;
+  selectArticles(queryObj)
     .then((articles) => {
       res.status(200).send(articles);
     })
