@@ -493,3 +493,30 @@ describe("POST /api/articles/:article_id/comments", () => {
     });
   });
 });
+
+describe("DELETE /api/comments/:comment_id", () => {
+  describe("successful usage", () => {
+    const commentId = 1;
+    test("DELETE 204: should delete the comment specified by the passed in id from the database", () => {
+      return request(app).delete(`/api/comments/${commentId}`).expect(204);
+    });
+  });
+  describe("errors", () => {
+    test("DELETE 404: should respond with an appropriate error message when passed a valid but non-existant id", () => {
+      return request(app)
+        .delete("/api/comments/99999")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("comment not found!");
+        });
+    });
+    test("DELETE 400: should respond with an appropriate error message when passed an invalid id", () => {
+      return request(app)
+        .delete("/api/comments/not-an-id")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("bad request: invalid id!");
+        });
+    });
+  });
+});

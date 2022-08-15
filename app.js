@@ -11,6 +11,7 @@ const { getUsers } = require("./controllers/users.controllers");
 const {
   getCommentsByArticleId,
   postComment,
+  deleteComment,
 } = require("./controllers/comments.controllers");
 
 app.get("/api/topics", getTopics);
@@ -20,6 +21,7 @@ app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 app.get("/api/users", getUsers);
 app.patch("/api/articles/:article_id", patchArticleById);
 app.post("/api/articles/:article_id/comments", postComment);
+app.delete("/api/comments/:comment_id", deleteComment);
 
 app.use((err, req, res, next) => {
   if (err.code === "22P02") {

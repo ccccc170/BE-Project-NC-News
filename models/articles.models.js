@@ -19,7 +19,7 @@ exports.selectArticles = (queries) => {
         "topic",
         "created_at",
         "votes",
-        "comment_id",
+        "comment_count",
       ].includes(sort_by)
     ) {
       return Promise.reject({ status: 400, msg: "Invalid sort query!" });
