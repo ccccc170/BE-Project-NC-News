@@ -38,7 +38,6 @@ app.use((err, req, res, next) => {
   if (err.code === "42703") {
     res.status(400).send({ msg: "unable to update: incorrect data type!" });
   }
-  console.log("here");
   res.status(err.status).send({ msg: err.msg });
 });
 
