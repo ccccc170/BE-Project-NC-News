@@ -3,6 +3,7 @@ const app = require("../app");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/index");
+const endpoints = require("../endpoints.json");
 
 afterAll(() => {
   return db.end();
@@ -23,16 +24,41 @@ describe("general errors", () => {
   });
 });
 
+describe("GET /api", () => {
+  test("Status 200: should respond with a json object of all the available endpoints of the api", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toBeInstanceOf(Object);
+        expect(body).toEqual(
+          expect.objectContaining({
+            "GET /api": expect.any(Object),
+            "GET /api/topics": expect.any(Object),
+            "GET /api/users": expect.any(Object),
+            "GET /api/articles": expect.any(Object),
+            "GET /api/articles/:article_id": expect.any(Object),
+            "GET /api/articles/:article_id/comments": expect.any(Object),
+            "PATCH /api/articles/:article_id": expect.any(Object),
+            "POST /api/articles/:article_id/comments": expect.any(Object),
+            "DELETE /api/comments/:comment_id": expect.any(Object),
+          })
+        );
+      });
+  });
+});
+
 describe("GET /api/topics", () => {
   describe("Successful usage", () => {
-    test("Status 200: should respond with an array of topic objects, each of which with 'slug' and 'description' properties", () => {
+    test("Status 200: response object should have a key of 'topics' and value of an array of topic objects, each of which with 'slug' and 'description' properties", () => {
       return request(app)
         .get("/api/topics")
         .expect(200)
         .then(({ body }) => {
-          expect(body).toBeInstanceOf(Array);
-          expect(body).toHaveLength(3);
-          body.forEach((topic) => {
+          expect(body).toBeInstanceOf(Object);
+          expect(body.topics).toBeInstanceOf(Array);
+          expect(body.topics).toHaveLength(3);
+          body.topics.forEach((topic) => {
             expect(topic).toEqual(
               expect.objectContaining({
                 description: expect.any(String),
@@ -47,14 +73,15 @@ describe("GET /api/topics", () => {
 
 describe("GET /api/users", () => {
   describe("Successful usage", () => {
-    test("Status 200: should respond with an array of user objects, each of which with 'username', 'name' and 'avatar_url' properties", () => {
+    test("Status 200: response object should have a key of 'users' and value of an array of user objects, each of which with 'username', 'name' and 'avatar_url' properties", () => {
       return request(app)
         .get("/api/users")
         .expect(200)
         .then(({ body }) => {
-          expect(body).toBeInstanceOf(Array);
-          expect(body).toHaveLength(4);
-          body.forEach((user) => {
+          expect(body).toBeInstanceOf(Object);
+          expect(body.users).toBeInstanceOf(Array);
+          expect(body.users).toHaveLength(4);
+          body.users.forEach((user) => {
             expect(user).toEqual(
               expect.objectContaining({
                 username: expect.any(String),
@@ -70,15 +97,16 @@ describe("GET /api/users", () => {
 
 describe("GET /api/articles", () => {
   describe("Successful usage", () => {
-    test("Status 200: should respond with an array of article objects, each of which with 'author', 'title', 'article_id', 'topic', 'created_at', 'votes' and 'comment_count' properties", () => {
+    test("Status 200: response object should have a key of 'articles' and value of an array of article objects, each of which with 'author', 'title', 'article_id', 'topic', 'created_at', 'votes' and 'comment_count' properties", () => {
       return request(app)
         .get("/api/articles")
         .expect(200)
         .then(({ body }) => {
-          expect(body).toBeInstanceOf(Array);
-          expect(body).toHaveLength(12);
-          body.forEach((user) => {
-            expect(user).toEqual(
+          expect(body).toBeInstanceOf(Object);
+          expect(body.articles).toBeInstanceOf(Array);
+          expect(body.articles).toHaveLength(12);
+          body.articles.forEach((article) => {
+            expect(article).toEqual(
               expect.objectContaining({
                 article_id: expect.any(Number),
                 title: expect.any(String),
@@ -92,23 +120,23 @@ describe("GET /api/articles", () => {
           });
         });
     });
-    test("Status 200: default sort by and sort order of response should be by date descending", () => {
+    test("Status 200: default sort by and sort order of article objects in the response should be by date descending", () => {
       return request(app)
         .get("/api/articles")
         .expect(200)
         .then(({ body }) => {
-          expect(body).toBeSortedBy("created_at", {
+          expect(body.articles).toBeSortedBy("created_at", {
             descending: true,
           });
         });
     });
-    test("Status 200: articles in response should be filtered by topic value if specified within the query, returining only articles witht that topic value", () => {
+    test("Status 200: article objects in response should be filtered by topic value if specified within the query, returining only articles witht that topic value", () => {
       return request(app)
         .get("/api/articles?topic=cats")
         .expect(200)
         .then(({ body }) => {
-          expect(body).toHaveLength(1);
-          body.forEach((article) => {
+          expect(body.articles).toHaveLength(1);
+          body.articles.forEach((article) => {
             expect(article).toEqual(
               expect.objectContaining({
                 topic: "cats",
@@ -122,7 +150,7 @@ describe("GET /api/articles", () => {
         .get("/api/articles?topic=dogs")
         .expect(200)
         .then(({ body }) => {
-          expect(body).toHaveLength(0);
+          expect(body.articles).toHaveLength(0);
         });
     });
     test("Status 200: response should be sorted by by specified column as per the query passed in", () => {
@@ -130,7 +158,7 @@ describe("GET /api/articles", () => {
         .get("/api/articles?sort_by=title")
         .expect(200)
         .then(({ body }) => {
-          expect(body).toBeSortedBy("title", {
+          expect(body.articles).toBeSortedBy("title", {
             descending: true,
             coerce: true,
           });
@@ -141,7 +169,7 @@ describe("GET /api/articles", () => {
         .get("/api/articles?order=asc")
         .expect(200)
         .then(({ body }) => {
-          expect(body).toBeSortedBy("created_at", {
+          expect(body.articles).toBeSortedBy("created_at", {
             ascending: true,
             coerce: true,
           });
@@ -152,7 +180,7 @@ describe("GET /api/articles", () => {
         .get("/api/articles?order=desc")
         .expect(200)
         .then(({ body }) => {
-          expect(body).toBeSortedBy("created_at", {
+          expect(body.articles).toBeSortedBy("created_at", {
             descending: true,
             coerce: true,
           });
@@ -163,12 +191,12 @@ describe("GET /api/articles", () => {
         .get("/api/articles?topic=cats&sort_by=votes&order=asc")
         .expect(200)
         .then(({ body }) => {
-          expect(body).toBeSortedBy("votes", {
+          expect(body.articles).toBeSortedBy("votes", {
             ascending: true,
             coerce: true,
           });
-          expect(body).toHaveLength(1);
-          body.forEach((user) => {
+          expect(body.articles).toHaveLength(1);
+          body.articles.forEach((user) => {
             expect(user).toEqual(
               expect.objectContaining({
                 topic: "cats",
@@ -200,13 +228,14 @@ describe("GET /api/articles", () => {
 
 describe("GET /api/articles/:article_id", () => {
   describe("Successful usage", () => {
-    test("Status 200: should respond with an article object with 'author', 'title', 'article_id', 'body', 'topic', 'created_at' and 'votes' properties corresponding to the passed in article id", () => {
+    test("Status 200: response object should have a key of 'article' with a value of an article object with 'author', 'title', 'article_id', 'body', 'topic', 'created_at' and 'votes' properties corresponding to the passed in article id", () => {
       const articleId = 1;
       return request(app)
         .get(`/api/articles/${articleId}`)
         .expect(200)
         .then(({ body }) => {
-          expect(body).toEqual(
+          expect(body).toBeInstanceOf(Object);
+          expect(body.article).toEqual(
             expect.objectContaining({
               article_id: articleId,
               title: "Living in the shadow of a great man",
@@ -224,7 +253,7 @@ describe("GET /api/articles/:article_id", () => {
       return request(app)
         .get(`/api/articles/${articleId}`)
         .then(({ body }) => {
-          expect(body).toEqual(
+          expect(body.article).toEqual(
             expect.objectContaining({
               comment_count: 11,
             })
@@ -255,15 +284,16 @@ describe("GET /api/articles/:article_id", () => {
 
 describe("GET /api/articles/:article_id/comments", () => {
   describe("Successful usage", () => {
-    test("Status 200: should respond with an array of comments objects, each of which with 'comment_id', 'votes', 'created_at', 'author' and 'body' properties corresponding to the passed in article id when comments are associated with that id", () => {
+    test("Status 200: response object should have a key of 'comments' with a value of an array of comments objects, each of which with 'comment_id', 'votes', 'created_at', 'author' and 'body' properties corresponding to the passed in article id, when comments are associated with that id", () => {
       const articleId = 1;
       return request(app)
         .get(`/api/articles/${articleId}/comments`)
         .expect(200)
         .then(({ body }) => {
-          expect(body).toBeInstanceOf(Array);
-          expect(body).toHaveLength(11);
-          body.forEach((comment) => {
+          expect(body).toBeInstanceOf(Object);
+          expect(body.comments).toBeInstanceOf(Array);
+          expect(body.comments).toHaveLength(11);
+          body.comments.forEach((comment) => {
             expect(comment).toEqual(
               expect.objectContaining({
                 comment_id: expect.any(Number),
@@ -282,8 +312,8 @@ describe("GET /api/articles/:article_id/comments", () => {
         .get(`/api/articles/${articleId}/comments`)
         .expect(200)
         .then(({ body }) => {
-          expect(body).toBeInstanceOf(Array);
-          expect(body).toHaveLength(0);
+          expect(body.comments).toBeInstanceOf(Array);
+          expect(body.comments).toHaveLength(0);
         });
     });
   });
@@ -310,7 +340,7 @@ describe("GET /api/articles/:article_id/comments", () => {
 
 describe("PATCH /api/articles/:article_id", () => {
   describe("Successful usage", () => {
-    test("PATCH: 200 should take an article id and an object indicating an amount to increment the corresponding article's 'vote' property by, increment the property by this amount in the database and respond with the updated article object", () => {
+    test("PATCH: 200 should take an article id and an object indicating an amount to increment the corresponding article's 'vote' property by, increment the property by this amount in the database and respond with an object with a key of 'article' and the updated article object as its value", () => {
       const articleId = 1;
       const articleUpdate = { inc_votes: 1 };
       return request(app)
@@ -318,7 +348,8 @@ describe("PATCH /api/articles/:article_id", () => {
         .send(articleUpdate)
         .expect(200)
         .then(({ body }) => {
-          expect(body).toEqual(
+          expect(body).toBeInstanceOf(Object);
+          expect(body.article).toEqual(
             expect.objectContaining({
               article_id: articleId,
               title: "Living in the shadow of a great man",
@@ -331,7 +362,7 @@ describe("PATCH /api/articles/:article_id", () => {
           );
         });
     });
-    test("PATCH: 200 should take an article id and an object indicating an amount to increment the corresponding article's 'vote' property by, decrement the property by this amount in the database and respond with the updated article object", () => {
+    test("PATCH: 200 should take an article id and an object indicating an amount to increment the corresponding article's 'vote' property by, decrement the property by this amount in the database and respond with an object with a key of 'article' and the updated article object", () => {
       const articleId = 1;
       const articleUpdate = { inc_votes: -100 };
       return request(app)
@@ -339,7 +370,8 @@ describe("PATCH /api/articles/:article_id", () => {
         .send(articleUpdate)
         .expect(200)
         .then(({ body }) => {
-          expect(body).toEqual(
+          expect(body).toBeInstanceOf(Object);
+          expect(body.article).toEqual(
             expect.objectContaining({
               article_id: articleId,
               votes: 0,
@@ -397,7 +429,7 @@ describe("PATCH /api/articles/:article_id", () => {
 
 describe("POST /api/articles/:article_id/comments", () => {
   describe("successful usage", () => {
-    test("Status 201: Should take an article id and comment object with 'username' and 'body' properties, add the comment to the database and return the posted comment", () => {
+    test("Status 201: Should take an article id and comment object with 'username' and 'body' properties, add the comment to the database and respond with an object with a key of 'comment' and the newly posted comment object as its value", () => {
       const articleId = 1;
       const inputComment = {
         username: "butter_bridge",
@@ -408,7 +440,8 @@ describe("POST /api/articles/:article_id/comments", () => {
         .send(inputComment)
         .expect(201)
         .then(({ body }) => {
-          expect(body).toEqual(
+          expect(body).toBeInstanceOf(Object);
+          expect(body.comment).toEqual(
             expect.objectContaining({
               article_id: articleId,
               author: inputComment.username,
