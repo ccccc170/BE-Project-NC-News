@@ -2,7 +2,7 @@
 
 **Hosted version:**
 
-A hosted version of this project can be found here: https://craigs-nc-news.herokuapp.com/ (however it does not work and I have no idea why! :D)
+A hosted version of this project can be found here: https://craigs-nc-news.herokuapp.com/api
 
 **Project summary:**
 
@@ -10,11 +10,14 @@ This project is a backend api allowing for interaction with a PostgreSQL databas
 
 **Cloning this project:**
 
-Cloning: I don't know how to clone this project.
+This project caan be forked and cloned from here: https://github.com/ccccc170/BE-Project-NC-News
 
-**Versions:**
+**Minimum Versions:**
 
-Versions: I am not sure what versions are.
+Ensure that these versions of Nodejs and PostgreSQL are installed to run this project:
+
+- node v18.2.0
+- postgres v12.11
 
 **Installing dependencies:**
 
@@ -32,6 +35,8 @@ Ensure the follwoing dev dependencies are installed for further development purp
 - jest-extended v2.0.0
 - jest-sorted v1.0.14
 - supertest v6.2.4
+
+Running the command `npm i` after cloning and opening the project should ensure that all dependencies are installed.
 
 **Creating .env files:**
 
