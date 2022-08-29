@@ -12,7 +12,7 @@ This project is a backend api allowing for interaction with a PostgreSQL databas
 
 This project caan be forked and cloned from here: https://github.com/ccccc170/BE-Project-NC-News
 
-**Minimum Versions:**
+**Minimum versions:**
 
 Ensure that these versions of Nodejs and PostgreSQL are installed to run this project:
 
